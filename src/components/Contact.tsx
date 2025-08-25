@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Mail, Phone, Linkedin, MapPin, Send, Clock, CheckCircle2, Sparkles } from "lucide-react";
+import { Mail, Phone, Linkedin, MapPin, Send, Clock, CheckCircle2, Sparkles, Loader2 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "@/components/ui/sonner";
+import { sendContactEmail } from "@/lib/email";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -11,9 +13,22 @@ const Contact = () => {
     message: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
+    if (isSubmitting) return;
+    try {
+      setIsSubmitting(true);
+      await sendContactEmail(formData);
+      toast.success("Thanks! Your message has been sent.");
+      setFormData({ name: '', email: '', message: '' });
+    } catch (error) {
+      console.error(error);
+      toast.error("Sorry, something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -203,10 +218,15 @@ const Contact = () => {
                     type="submit"
                     size="lg"
                     className="group w-full primary-gradient hover-glow-primary text-xl font-bold py-6 rounded-2xl shadow-elegant relative overflow-hidden"
+                    disabled={isSubmitting}
                   >
                     <span className="relative z-10 flex items-center justify-center gap-3">
-                      <Sparkles className="w-6 h-6 group-hover:rotate-12 animate-smooth" />
-                      Start Our Partnership
+                      {isSubmitting ? (
+                        <Loader2 className="w-6 h-6 animate-spin" />
+                      ) : (
+                        <Sparkles className="w-6 h-6 group-hover:rotate-12 animate-smooth" />
+                      )}
+                      {isSubmitting ? "Sending..." : "Start Our Partnership"}
                     </span>
                     <div className="absolute inset-0 bg-white/10 translate-x-full group-hover:translate-x-0 animate-smooth"></div>
                   </Button>
