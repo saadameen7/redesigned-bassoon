@@ -71,3 +71,27 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+
+## Contact form: EmailJS setup
+
+This project uses EmailJS to send contact form submissions.
+
+1) Install deps (already installed): `@emailjs/browser`
+
+2) Create a `.env` file based on `.env.example` and set:
+
+```
+VITE_EMAILJS_PUBLIC_KEY=...
+VITE_EMAILJS_SERVICE_ID=...
+VITE_EMAILJS_TEMPLATE_ID=...
+```
+
+3) In EmailJS, ensure your template has these variables:
+
+- `from_name`
+- `reply_to`
+- `message`
+
+4) Restart dev server after setting env vars.
+
+Form code: `src/components/Contact.tsx` uses `sendContactEmail` from `src/lib/email.ts` and shows success/error toasts.
