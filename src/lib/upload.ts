@@ -17,10 +17,7 @@ async function fileToBase64(file: File): Promise<string> {
 }
 
 export async function uploadFileToAppsScript(file: File): Promise<UploadResponse> {
-  const endpoint = import.meta.env.VITE_APPS_SCRIPT_UPLOAD_URL;
-  if (!endpoint) {
-    throw new Error("Apps Script upload URL not configured. Set VITE_APPS_SCRIPT_UPLOAD_URL");
-  }
+  const endpoint = import.meta.env.VITE_UPLOAD_PROXY_URL || "/.netlify/functions/gas-proxy";
 
   const base64 = await fileToBase64(file);
 
