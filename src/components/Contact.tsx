@@ -5,6 +5,7 @@ import { Mail, Phone, Linkedin, MapPin, Send, Clock, CheckCircle2, Sparkles, Loa
 import { useState } from "react";
 import { toast } from "@/components/ui/sonner";
 import { sendContactEmail } from "@/lib/email";
+import { uploadFileToAppsScript } from "@/lib/upload";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -14,15 +15,22 @@ const Contact = () => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
     try {
       setIsSubmitting(true);
-      await sendContactEmail(formData);
+      let attachmentUrl: string | undefined = undefined;
+      if (selectedFile) {
+        const upload = await uploadFileToAppsScript(selectedFile);
+        attachmentUrl = upload.fileUrl;
+      }
+      await sendContactEmail({ ...formData, attachment_url: attachmentUrl });
       toast.success("Thanks! Your message has been sent.");
       setFormData({ name: '', email: '', message: '' });
+      setSelectedFile(null);
     } catch (error) {
       console.error(error);
       toast.error("Sorry, something went wrong. Please try again.");
@@ -36,6 +44,11 @@ const Contact = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const fileList = e.target.files;
+    setSelectedFile(fileList && fileList.length > 0 ? fileList[0] : null);
   };
 
   const contactInfo = [
@@ -214,6 +227,18 @@ const Contact = () => {
                     />
                   </div>
                   
+                  <div>
+                    <label className="block text-sm font-semibold mb-3">Attach File (optional)</label>
+                    <Input
+                      type="file"
+                      name="attachment"
+                      onChange={handleFileChange}
+                      className="bg-background/50 backdrop-blur-sm border border-white/20 rounded-xl p-4 text-lg focus:border-primary/50 focus:ring-primary/30 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary/20 file:text-primary hover:file:bg-primary/30"
+                      disabled={isSubmitting}
+                    />
+                    <p className="mt-2 text-sm text-foreground-muted">Max 25 MB. Accepted: images, PDFs, docs.</p>
+                  </div>
+
                   <Button 
                     type="submit"
                     size="lg"

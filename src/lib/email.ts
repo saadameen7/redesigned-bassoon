@@ -4,6 +4,7 @@ type ContactFormData = {
   name: string;
   email: string;
   message: string;
+  attachment_url?: string;
 };
 
 export const sendContactEmail = async (
@@ -26,6 +27,7 @@ export const sendContactEmail = async (
       from_name: data.name,
       reply_to: data.email,
       message: data.message,
+      attachment_url: data.attachment_url || "",
     },
     { publicKey }
   );
